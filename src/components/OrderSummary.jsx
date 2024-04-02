@@ -1,14 +1,11 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
 import React from "react";
 import { useMutation } from "react-query";
-import $axios from "../lib/axios.instance";
 import { useDispatch } from "react-redux";
-import {
-  openErrorSnackBar,
-  openSuccessSnackBar,
-} from "../store/slices/snackbarSlice";
-import Loader from "./Loader";
 import { useNavigate } from "react-router-dom";
+import $axios from "../lib/axios.instance";
+import { openErrorSnackBar } from "../store/slices/snackbarSlice";
+import Loader from "./Loader";
 
 const OrderSummary = ({ orderSummary, grandTotal, productDataForOrdering }) => {
   console.log(productDataForOrdering);

@@ -3,222 +3,170 @@ import {
   FormControl,
   FormHelperText,
   InputLabel,
+  LinearProgress,
   MenuItem,
   Select,
+  Stack,
   TextField,
   Typography,
 } from "@mui/material";
-import { LocalizationProvider } from "@mui/x-date-pickers";
 import { Formik } from "formik";
 import React from "react";
-import { Link } from "react-router-dom";
-import * as Yup from "yup";
-import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import dayjs from "dayjs";
 import { useMutation } from "react-query";
-import axios from "axios";
-import CircularProgress from "@mui/material/CircularProgress";
-import LinearProgress from "@mui/material/LinearProgress";
-import { Box } from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import $axios from "../lib/axios.instance";
 import { useDispatch } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import * as Yup from "yup";
+
+import $axios from "../lib/axios.instance";
 import {
   openErrorSnackBar,
   openSuccessSnackBar,
 } from "../store/slices/snackbarSlice";
+
 const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const minDate = dayjs().startOf("d").subtract(18, "y").format("DD/MM/YYYY");
 
-  const { isLoading, mutate } = useMutation({
+  const { isLoading, mutate: registerUser } = useMutation({
     mutationKey: ["register-user"],
     mutationFn: async (values) => {
       return await $axios.post("/user/register", values);
     },
-    onSuccess: (res) => {
+    onSuccess: () => {
       navigate("/login");
-      dispatch(openSuccessSnackBar(res?.data?.message));
+      dispatch(openSuccessSnackBar("User is registered successfully."));
     },
     onError: (error) => {
-      dispatch(openErrorSnackBar(error?.response?.data?.message));
+      dispatch(openErrorSnackBar(error.response.data.message));
     },
   });
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column" }}>
-      {isLoading && <LinearProgress color="success" />}
+    <>
+      {isLoading && <LinearProgress color="secondary" />}
       <Formik
         initialValues={{
           firstName: "",
           lastName: "",
           email: "",
           password: "",
-          dob: "",
-          gender: "",
           role: "",
         }}
         validationSchema={Yup.object({
           firstName: Yup.string()
             .required("First name is required.")
             .trim()
-            .max(25, "First name must be at max 25 characters."),
+            .max(55, "First name must be at max 55 characters."),
           lastName: Yup.string()
             .required("Last name is required.")
             .trim()
-            .max(25, "Last name must be at max 25 characters."),
+            .max(55, "Last name must be at max 55 characters."),
           email: Yup.string()
-            .email("Must be valid email.")
+            .email("Must be  valid email.")
             .required("Email is required.")
             .trim()
             .lowercase()
             .max(55, "Email must be at max 55 characters."),
           password: Yup.string()
             .required("Password is required.")
-            .trim()
-            .min(4, "Password must be at least 4 characters.")
-            .max(20, "Password must be at max 20 characters."),
-          dob: Yup.date().nullable(),
-          gender: Yup.string()
-            .nullable()
-            .oneOf(["male", "female", "other"])
-            .trim(),
+            .min(8, "Password must be at least 8 characters.")
+            .max(20, "password must be at max 20 characters."),
+
           role: Yup.string()
+            .oneOf(["buyer", "seller"])
             .required("Role is required.")
-            .trim()
-            .oneOf(["buyer", "seller"]),
+            .trim(),
         })}
         onSubmit={(values) => {
-          values.dob = null;
-          values.gender = null;
-          mutate(values);
+          registerUser(values);
         }}
       >
-        {(formik) => (
+        {({ handleSubmit, getFieldProps, setFieldValue, errors, touched }) => (
           <form
-            onSubmit={formik.handleSubmit}
+            onSubmit={handleSubmit}
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: "1rem",
               padding: "2rem",
-              width: "330px",
-
+              gap: "2rem",
+              minWidth: "400px",
               boxShadow:
-                "rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px",
+                "rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px",
             }}
           >
-            <Typography variant="h5">Sign up</Typography>
-
+            <Typography variant="h4">Sign Up</Typography>
             <FormControl>
               <TextField
-                required
-                label="First Name"
-                {...formik.getFieldProps("firstName")}
+                color="success"
+                variant="outlined"
+                label="First name"
+                error={!!touched.firstName && !!errors.firstName}
+                helperText={errors.firstName}
+                {...getFieldProps("firstName")}
               />
-
-              {formik.touched.firstName && formik.errors.firstName ? (
-                <FormHelperText error>{formik.errors.firstName}</FormHelperText>
-              ) : null}
             </FormControl>
-
             <FormControl>
               <TextField
-                required
-                label="Last Name"
-                {...formik.getFieldProps("lastName")}
+                color="success"
+                variant="outlined"
+                label="Last name"
+                error={!!touched.lastName && !!errors.lastName}
+                helperText={errors.lastName}
+                {...getFieldProps("lastName")}
               />
-
-              {formik.touched.lastName && formik.errors.lastName ? (
-                <FormHelperText error>{formik.errors.lastName}</FormHelperText>
-              ) : null}
             </FormControl>
-
             <FormControl>
               <TextField
-                required
+                color="success"
+                variant="outlined"
                 label="Email"
-                {...formik.getFieldProps("email")}
+                error={!!touched.email && !!errors.email}
+                helperText={errors.email}
+                {...getFieldProps("email")}
               />
-
-              {formik.touched.email && formik.errors.email ? (
-                <FormHelperText error>{formik.errors.email}</FormHelperText>
-              ) : null}
             </FormControl>
-
             <FormControl>
               <TextField
-                required
+                color="success"
+                variant="outlined"
                 label="Password"
-                {...formik.getFieldProps("password")}
+                error={!!touched.password && !!errors.password}
+                helperText={errors.password}
+                {...getFieldProps("password")}
               />
-
-              {formik.touched.password && formik.errors.password ? (
-                <FormHelperText error>{formik.errors.password}</FormHelperText>
-              ) : null}
             </FormControl>
 
-            <FormControl fullWidth>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DemoContainer components={["DatePicker"]}>
-                  <DatePicker
-                    disableFuture
-                    label="DOB"
-                    maxDate={minDate}
-                    onChange={(event) => {
-                      console.log({ event });
-                      formik.setFieldValue(
-                        "dob",
-                        dayjs(event).format("DD/MM/YYYY")
-                      );
-                    }}
-                  />
-                </DemoContainer>
-              </LocalizationProvider>
-
-              {formik.touched.dob && formik.errors.dob ? (
-                <FormHelperText error>{formik.errors.dob}</FormHelperText>
-              ) : null}
-            </FormControl>
-
-            <FormControl fullWidth>
-              <InputLabel>Gender</InputLabel>
-              <Select label="Gender" {...formik.getFieldProps("gender")}>
-                <MenuItem value="male">Male</MenuItem>
-                <MenuItem value="female">Female</MenuItem>
-                <MenuItem value="other">Prefer No To Say</MenuItem>
-              </Select>
-              {formik.touched.gender && formik.errors.gender ? (
-                <FormHelperText error>{formik.errors.gender}</FormHelperText>
-              ) : null}
-            </FormControl>
-
-            <FormControl fullWidth>
-              <InputLabel required>Role</InputLabel>
-              <Select label="Role" {...formik.getFieldProps("role")}>
+            <FormControl fullWidth error={!!touched.role && !!errors.role}>
+              <InputLabel id="demo-simple-select-label">Role</InputLabel>
+              <Select
+                color="success"
+                {...getFieldProps("role")}
+                label="Role"
+                onChange={(event) => {
+                  setFieldValue("role", event.target.value);
+                }}
+              >
                 <MenuItem value="buyer">Buyer</MenuItem>
                 <MenuItem value="seller">Seller</MenuItem>
               </Select>
-              {formik.touched.role && formik.errors.role ? (
-                <FormHelperText error>{formik.errors.role}</FormHelperText>
-              ) : null}
+              <FormHelperText>{errors.role}</FormHelperText>
             </FormControl>
 
-            <Button type="submit" variant="contained" color="success">
-              Register
-            </Button>
-            <Link to="/login">
-              <Typography variant="subtitle2">
-                Already registered? Login
-              </Typography>
-            </Link>
+            <Stack spacing={1}>
+              <Button variant="contained" type="submit" color="success">
+                Register
+              </Button>
+
+              <Link to="/login">
+                <Typography variant="subtitle2">
+                  Already registered? Login
+                </Typography>
+              </Link>
+            </Stack>
           </form>
         )}
       </Formik>
-    </Box>
+    </>
   );
 };
 

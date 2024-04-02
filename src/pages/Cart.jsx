@@ -1,11 +1,11 @@
+import { Box } from "@mui/material";
 import React from "react";
-import CartTable from "../components/CartTable";
-import OrderSummary from "../components/OrderSummary";
-import { Box, Button } from "@mui/material";
 import { useQuery } from "react-query";
-import $axios from "../lib/axios.instance";
+import CartTable from "../components/CartTable";
 import Loader from "../components/Loader";
 import NoCartItem from "../components/NoCartItem";
+import OrderSummary from "../components/OrderSummary";
+import $axios from "../lib/axios.instance";
 
 const Cart = () => {
   const { isLoading, isError, error, data } = useQuery({
@@ -33,7 +33,7 @@ const Cart = () => {
     return <Loader />;
   }
 
-  if (cartItems.length < 1) {
+  if (cartItems?.length === 0) {
     return <NoCartItem />;
   }
   return (
